@@ -1,6 +1,6 @@
 {
   "package": "com.cleanroommc.pointer.mixins",
-  "refmap": "mixins.blackbox.refmap.json",
+  "refmap": "mixins.pointer.refmap.json",
   "target": "@env(DEFAULT)",
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_8",
