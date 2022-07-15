@@ -1,15 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "pointer",
+  "name": "Pointer",
+  "description": "Access a block from anywhere in the same dimension.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
-  "updateUrl": "",
-  "authorList": ["CleanroomMC"],
-  "credits": "Authors of this project",
-  "logoFile": "",
+  "url": "https://github.com/CleanroomMC/Pointer",
+  "authorList": ["CleanroomMC", "Rongmario"],
+  "credits": "Rongmario",
+  "logoFile": "icon.png",
   "screenshots": [],
   "dependencies": []
 }

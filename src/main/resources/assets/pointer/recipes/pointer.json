@@ -1,0 +1,22 @@
+{
+  "type": "forge:ore_shaped",
+  "group": "pointer:pointer",
+  "pattern": [
+    "W  ",
+    "WWW",
+    "WEW"
+  ],
+  "key": {
+    "W": {
+      "type": "forge:ore_dict",
+      "ore": "wool"
+    },
+    "E": {
+      "type": "minecraft:item",
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "result": {
+    "item": "pointer:pointer"
+  }
+}
