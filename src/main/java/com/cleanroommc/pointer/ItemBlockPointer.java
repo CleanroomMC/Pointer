@@ -2,23 +2,18 @@ package com.cleanroommc.pointer;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import tile.TilePointer;
 
-import javax.annotation.Nullable;
-
-public class ItemBlockPointer extends ItemBlock implements ITileEntityProvider {
+public class ItemBlockPointer extends ItemBlock {
 
     public static ItemBlockPointer INSTANCE;
 
@@ -27,12 +22,6 @@ public class ItemBlockPointer extends ItemBlock implements ITileEntityProvider {
         setRegistryName("pointer", "remote_control_station");
         setTranslationKey("remote_control_station");
         setCreativeTab(CreativeTabs.TOOLS);
-    }
-
-    @Nullable
-    @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new TilePointer();
     }
 
     @Override
@@ -50,18 +39,17 @@ public class ItemBlockPointer extends ItemBlock implements ITileEntityProvider {
         }
 
         IBlockState state = world.getBlockState(pos);
-        if (state.getBlock() == this.block)
-        {
+        if (state.getBlock() == this.block) {
             setTileEntityNBT(world, player, pos, stack);
             this.block.onBlockPlacedBy(world, pos, state, player, stack);
 
-            TilePointer tp = (TilePointer )world.getTileEntity(pos);
+            TilePointer tp = (TilePointer) world.getTileEntity(pos);
             if (tp != null) {
                 tp.setFacings(facings);
             }
 
             if (player instanceof EntityPlayerMP)
-                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, pos, stack);
+                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP) player, pos, stack);
         }
 
         return true;

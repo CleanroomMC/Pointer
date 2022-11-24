@@ -38,20 +38,18 @@ public class Pointer {
         ItemPointer.INSTANCE = new ItemPointer();
         event.getRegistry().register(ItemPointer.INSTANCE);
         ItemBlockPointer.INSTANCE = new ItemBlockPointer(BlockPointer.INSTANCE);
-        event.getRegistry().registerAll( ItemBlockPointer.INSTANCE );
+        event.getRegistry().registerAll(ItemBlockPointer.INSTANCE);
     }
 
     @SubscribeEvent
-    public void registerBlocks( RegistryEvent.Register<Block> event )
-    {
+    public void registerBlocks(RegistryEvent.Register<Block> event) {
         BlockPointer.INSTANCE = new BlockPointer(Material.IRON);
         event.getRegistry().register(BlockPointer.INSTANCE);
     }
 
     @SubscribeEvent
-    public void onRegisterEntities(RegistryEvent.Register<EntityEntry> event)
-    {
-        GameRegistry.registerTileEntity( TilePointer.class, new ResourceLocation( "pointer", "tilepointer") );
+    public void onRegisterEntities(RegistryEvent.Register<EntityEntry> event) {
+        GameRegistry.registerTileEntity(TilePointer.class, new ResourceLocation("pointer", "tilepointer"));
     }
 
     public static class ClientEventHandler {

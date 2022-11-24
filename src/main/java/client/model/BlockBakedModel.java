@@ -103,21 +103,20 @@ public class BlockBakedModel implements IBakedModel {
                     rotateX(transformMatrix, (float) (Math.PI));
                     rotateY(transformMatrix, (float) (Math.PI));
                 }
-            }
-            else {
+            } else {
                 if (topFacing == WEST) {
                     rotateZ(transformMatrix, (float) (Math.PI / 2));
                     if (frontFacing == DOWN) {
-                        rotateY(transformMatrix, (float) (-Math.PI/ 2));
+                        rotateY(transformMatrix, (float) (-Math.PI / 2));
                     } else if (frontFacing == UP) {
-                        rotateY(transformMatrix, (float) (+Math.PI/ 2));
+                        rotateY(transformMatrix, (float) (+Math.PI / 2));
                     }
                 } else if (topFacing == EAST) {
                     rotateZ(transformMatrix, (float) (-Math.PI / 2));
                     if (frontFacing == DOWN) {
-                        rotateY(transformMatrix, (float) (Math.PI/ 2));
+                        rotateY(transformMatrix, (float) (Math.PI / 2));
                     } else if (frontFacing == UP) {
-                        rotateY(transformMatrix, (float) (-Math.PI/ 2));
+                        rotateY(transformMatrix, (float) (-Math.PI / 2));
                     }
                 } else if (topFacing == NORTH) {
                     rotateX(transformMatrix, (float) (-Math.PI / 2));
@@ -148,9 +147,9 @@ public class BlockBakedModel implements IBakedModel {
                 transformMatrix.transform(vertexTransformingVec);
 
                 // Converting the new data to ints.
-                int x = Float.floatToRawIntBits((float) (vertexTransformingVec.x));
-                int y = Float.floatToRawIntBits((float) (vertexTransformingVec.y));
-                int z = Float.floatToRawIntBits((float) (vertexTransformingVec.z));
+                int x = Float.floatToRawIntBits(vertexTransformingVec.x);
+                int y = Float.floatToRawIntBits(vertexTransformingVec.y);
+                int z = Float.floatToRawIntBits(vertexTransformingVec.z);
 
                 // vertex position data
                 newQuad[vertexIndex] = x;

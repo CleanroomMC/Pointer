@@ -89,6 +89,9 @@ public class BlockPointer extends Block implements ITileEntityProvider {
                         }
                         IBlockState targetState = world.getBlockState(pointerPos);
                         if (!targetState.getBlock().isAir(targetState, world, pointerPos)) {
+                            if (player.getCooldownTracker().hasCooldown(ItemPointer.INSTANCE)) {
+                                return false;
+                            }
                             Triple<Float, Float, Float> hitPos = ItemPointer.INSTANCE.getHitPos(tag);
                             ((EntityPlayerExpansion) player).setUsingPointer();
                             player.swingArm(hand);
