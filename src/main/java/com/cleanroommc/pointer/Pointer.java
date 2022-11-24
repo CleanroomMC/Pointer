@@ -1,10 +1,13 @@
 package com.cleanroommc.pointer;
 
+import client.model.BlockBakedModel;
+import client.model.SimpleStateMapper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
@@ -56,8 +59,16 @@ public class Pointer {
         @SubscribeEvent
         public void onModelRegistry(ModelRegistryEvent event) {
             ModelLoader.setCustomModelResourceLocation(ItemPointer.INSTANCE, 0, new ModelResourceLocation(ItemPointer.INSTANCE.getRegistryName(), "inventory"));
+            ModelLoader.setCustomModelResourceLocation(ItemBlockPointer.INSTANCE, 0, new ModelResourceLocation(ItemBlockPointer.INSTANCE.getRegistryName(), "inventory"));
+            ModelLoader.setCustomStateMapper(BlockPointer.INSTANCE, new SimpleStateMapper(BlockPointer.MODEL_LOCATION));
+            ModelLoader.setCustomModelResourceLocation(ItemBlockPointer.INSTANCE, 0, new ModelResourceLocation(ItemBlockPointer.INSTANCE.getRegistryName(), "normal"));
         }
 
+        @SubscribeEvent
+        public void onModelsBake(ModelBakeEvent event) {
+            event.getModelRegistry().putObject(BlockPointer.MODEL_LOCATION, new BlockBakedModel());
+
+        }
     }
 
 }

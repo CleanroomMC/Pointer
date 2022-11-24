@@ -3,18 +3,26 @@ package com.cleanroommc.pointer;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.common.util.Constants;
 import org.apache.commons.lang3.tuple.Triple;
 import tile.TilePointer;
@@ -23,12 +31,36 @@ import javax.annotation.Nullable;
 
 public class BlockPointer extends Block implements ITileEntityProvider {
     public static BlockPointer INSTANCE;
+    public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation(new ResourceLocation("pointer", "render"), "normal");
+    public static final IUnlistedProperty<EnumFacing[]> FACING = UnlistedDirection.INSTANCE;
 
     public BlockPointer(Material materialIn) {
         super(materialIn);
-        setRegistryName("pointer", "pointerBlock");
-        setTranslationKey("pointerBlock");
+        setRegistryName("pointer", "remote_control_station");
+        setTranslationKey("remote_control_station");
         setCreativeTab(CreativeTabs.TOOLS);
+    }
+
+
+
+    @Override
+    protected BlockStateContainer createBlockState() {
+        return new ExtendedBlockState(this, new IProperty[]{}, new IUnlistedProperty[]{FACING});
+    }
+
+    @Override
+    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+        TileEntity te = world.getTileEntity(pos);
+        IExtendedBlockState extState = (IExtendedBlockState) state;
+        if (te instanceof TilePointer) {
+            return extState.withProperty(FACING, ((TilePointer) te).getFacings());
+        }
+        return super.getExtendedState(state, world, pos);
+    }
+
+    @Override
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+        return super.getActualState(state, worldIn, pos);
     }
 
     @Nullable
@@ -74,4 +106,46 @@ public class BlockPointer extends Block implements ITileEntityProvider {
         }
         return true;
     }
+
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        TileEntity te = worldIn.getTileEntity(pos);
+        if (te instanceof TilePointer) {
+            EnumFacing verticalFacing;
+            float eyeDiff = (float) Math.abs(placer.posY + placer.getEyeHeight() - (pos.getY() + 0.5F));
+            if (eyeDiff > 2) {
+                verticalFacing = EnumFacing.getFacingFromVector(
+                        0,
+                        (float) (placer.posY + placer.getEyeHeight() - (pos.getY() + 0.5)),
+                        0);
+            } else {
+                verticalFacing = null;
+            }
+            EnumFacing horizontalFacing = EnumFacing.getFacingFromVector(
+                    (float) (placer.posX - (pos.getX() + 0.5)),
+                    0,
+                    (float) (placer.posZ - (pos.getZ() + 0.5)));
+
+            EnumFacing[] facing;
+            if (verticalFacing == null){
+                facing = new EnumFacing[]{horizontalFacing};
+            } else {
+                facing = new EnumFacing[]{horizontalFacing, verticalFacing};
+            }
+
+            ((TilePointer) te).setFacings(facing);
+        }
+    }
+
+    @Override
+    public boolean isFullBlock(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.MODEL;
+    }
+
+
 }
