@@ -41,8 +41,6 @@ public class BlockPointer extends Block implements ITileEntityProvider {
         setCreativeTab(CreativeTabs.TOOLS);
     }
 
-
-
     @Override
     protected BlockStateContainer createBlockState() {
         return new ExtendedBlockState(this, new IProperty[]{}, new IUnlistedProperty[]{FACING});
@@ -109,36 +107,20 @@ public class BlockPointer extends Block implements ITileEntityProvider {
 
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        TileEntity te = worldIn.getTileEntity(pos);
-        if (te instanceof TilePointer) {
-            EnumFacing verticalFacing;
-            float eyeDiff = (float) Math.abs(placer.posY + placer.getEyeHeight() - (pos.getY() + 0.5F));
-            if (eyeDiff > 2) {
-                verticalFacing = EnumFacing.getFacingFromVector(
-                        0,
-                        (float) (placer.posY + placer.getEyeHeight() - (pos.getY() + 0.5)),
-                        0);
-            } else {
-                verticalFacing = null;
-            }
-            EnumFacing horizontalFacing = EnumFacing.getFacingFromVector(
-                    (float) (placer.posX - (pos.getX() + 0.5)),
-                    0,
-                    (float) (placer.posZ - (pos.getZ() + 0.5)));
-
-            EnumFacing[] facing;
-            if (verticalFacing == null){
-                facing = new EnumFacing[]{horizontalFacing};
-            } else {
-                facing = new EnumFacing[]{horizontalFacing, verticalFacing};
-            }
-
-            ((TilePointer) te).setFacings(facing);
-        }
     }
 
     @Override
     public boolean isFullBlock(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isFullCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face) {
         return false;
     }
 

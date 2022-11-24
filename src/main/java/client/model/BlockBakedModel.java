@@ -24,6 +24,7 @@ import java.util.List;
 import static net.minecraft.util.EnumFacing.DOWN;
 import static net.minecraft.util.EnumFacing.EAST;
 import static net.minecraft.util.EnumFacing.NORTH;
+import static net.minecraft.util.EnumFacing.SOUTH;
 import static net.minecraft.util.EnumFacing.UP;
 import static net.minecraft.util.EnumFacing.WEST;
 
@@ -80,58 +81,91 @@ public class BlockBakedModel implements IBakedModel {
         final Tuple4f vertexTransformingVec = new Vector4f();
         if (f == null) return Collections.emptyList();
 
-        int face = 0;
-        for (EnumFacing facing : f) {
-            face |= facing.ordinal();
-        }
+        EnumFacing topFacing = f[0];
+        EnumFacing frontFacing = f[1];
 
         List<BakedQuad> result = new ArrayList<>();
         for (BakedQuad b : q) {
             transformMatrix.setIdentity();
             moveToPivot(transformMatrix, PIVOT);
-            if ((face & NORTH.ordinal()) != 0) {
-                rotateY(transformMatrix, (float) (-Math.PI));
-            } else if ((face & EAST.ordinal()) != 0) {
-                rotateY(transformMatrix, (float) (Math.PI / 2));
-            } else if ((face & WEST.ordinal()) != 0) {
-                rotateY(transformMatrix, (float) (Math.PI * 3 / 2));
+
+            if (topFacing == UP || topFacing == DOWN) {
+                if (frontFacing == NORTH) {
+                    rotateY(transformMatrix, (float) (Math.PI));
+                } else if (frontFacing == EAST) {
+                    rotateY(transformMatrix, (float) (Math.PI / 2));
+                } else if (frontFacing == WEST) {
+                    rotateY(transformMatrix, (float) (-Math.PI / 2));
+                } else if (frontFacing == SOUTH) {
+                    //rotateY(transformMatrix, (float) (Math.PI));
+                }
+                if (topFacing == DOWN) {
+                    rotateX(transformMatrix, (float) (Math.PI));
+                    rotateY(transformMatrix, (float) (Math.PI));
+                }
             }
+            else {
+                if (topFacing == WEST) {
+                    rotateZ(transformMatrix, (float) (Math.PI / 2));
+                    if (frontFacing == DOWN) {
+                        rotateY(transformMatrix, (float) (-Math.PI/ 2));
+                    } else if (frontFacing == UP) {
+                        rotateY(transformMatrix, (float) (+Math.PI/ 2));
+                    }
+                } else if (topFacing == EAST) {
+                    rotateZ(transformMatrix, (float) (-Math.PI / 2));
+                    if (frontFacing == DOWN) {
+                        rotateY(transformMatrix, (float) (Math.PI/ 2));
+                    } else if (frontFacing == UP) {
+                        rotateY(transformMatrix, (float) (-Math.PI/ 2));
+                    }
+                } else if (topFacing == NORTH) {
+                    rotateX(transformMatrix, (float) (-Math.PI / 2));
+                    if (frontFacing == DOWN) {
+                        rotateY(transformMatrix, (float) (Math.PI));
+                    }
+                } else {
+                    rotateX(transformMatrix, (float) (Math.PI / 2));
+                    if (frontFacing == UP) {
+                        rotateY(transformMatrix, (float) (Math.PI));
+                    }
+                }
+            }
+
             moveToPivot(transformMatrix, APIVOT);
 
             int[] newQuad = new int[28];
-            for (int i = 0; i < b.getVertexData().length; i++) {
-                int[] quadData = b.getVertexData();
-                for (int k = 0; k < 4; ++k) {
-                    // Getting the offset for the current vertex.
-                    int vertexIndex = k * 7;
-                    vertexTransformingVec.x = Float.intBitsToFloat(quadData[vertexIndex]);
-                    vertexTransformingVec.y = Float.intBitsToFloat(quadData[vertexIndex + 1]);
-                    vertexTransformingVec.z = Float.intBitsToFloat(quadData[vertexIndex + 2]);
-                    vertexTransformingVec.w = 1;
+            int[] quadData = b.getVertexData();
+            for (int k = 0; k < 4; ++k) {
+                // Getting the offset for the current vertex.
+                int vertexIndex = k * 7;
+                vertexTransformingVec.x = Float.intBitsToFloat(quadData[vertexIndex]);
+                vertexTransformingVec.y = Float.intBitsToFloat(quadData[vertexIndex + 1]);
+                vertexTransformingVec.z = Float.intBitsToFloat(quadData[vertexIndex + 2]);
+                vertexTransformingVec.w = 1;
 
-                    // Transforming it by the model matrix.
-                    transformMatrix.transform(vertexTransformingVec);
+                // Transforming it by the model matrix.
+                transformMatrix.transform(vertexTransformingVec);
 
-                    // Converting the new data to ints.
-                    int x = Float.floatToRawIntBits((float) (vertexTransformingVec.x));
-                    int y = Float.floatToRawIntBits((float) (vertexTransformingVec.y));
-                    int z = Float.floatToRawIntBits((float) (vertexTransformingVec.z));
+                // Converting the new data to ints.
+                int x = Float.floatToRawIntBits((float) (vertexTransformingVec.x));
+                int y = Float.floatToRawIntBits((float) (vertexTransformingVec.y));
+                int z = Float.floatToRawIntBits((float) (vertexTransformingVec.z));
 
-                    // vertex position data
-                    newQuad[vertexIndex] = x;
-                    newQuad[vertexIndex + 1] = y;
-                    newQuad[vertexIndex + 2] = z;
+                // vertex position data
+                newQuad[vertexIndex] = x;
+                newQuad[vertexIndex + 1] = y;
+                newQuad[vertexIndex + 2] = z;
 
-                    newQuad[vertexIndex + 3] = quadData[vertexIndex + 3];
+                newQuad[vertexIndex + 3] = quadData[vertexIndex + 3];
 
-                    newQuad[vertexIndex + 4] = quadData[vertexIndex + 4]; //texture
-                    newQuad[vertexIndex + 5] = quadData[vertexIndex + 5];
+                newQuad[vertexIndex + 4] = quadData[vertexIndex + 4]; //texture
+                newQuad[vertexIndex + 5] = quadData[vertexIndex + 5];
 
-                    // vertex brightness
-                    newQuad[vertexIndex + 6] = quadData[vertexIndex + 6];
-                }
-                b = new BakedQuad(newQuad, b.getTintIndex(), b.getFace(), b.getSprite(), true, DefaultVertexFormats.BLOCK);
+                // vertex brightness
+                newQuad[vertexIndex + 6] = quadData[vertexIndex + 6];
             }
+            b = new BakedQuad(newQuad, b.getTintIndex(), b.getFace(), b.getSprite(), true, DefaultVertexFormats.BLOCK);
             result.add(b);
         }
         return result;
