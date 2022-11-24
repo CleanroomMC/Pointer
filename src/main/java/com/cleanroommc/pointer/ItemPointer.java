@@ -127,12 +127,12 @@ public class ItemPointer extends Item {
     }
 
     @Nullable
-    private BlockPos getPointerPos(NBTTagCompound tag) {
+    public BlockPos getPointerPos(NBTTagCompound tag) {
         return tag.hasKey("Position", NBT.TAG_LONG) ? BlockPos.fromLong(tag.getLong("Position")) : null;
     }
 
     @Nullable
-    private Integer getPointerDimension(NBTTagCompound tag) {
+    Integer getPointerDimension(NBTTagCompound tag) {
         return tag.hasKey("Dimension", NBT.TAG_INT) ? tag.getInteger("Dimension") : null;
     }
 
@@ -140,11 +140,11 @@ public class ItemPointer extends Item {
         return tag.hasKey("DimensionName", NBT.TAG_STRING) ? tag.getString("DimensionName") : "N/A";
     }
 
-    private EnumFacing getPointerFacing(NBTTagCompound tag) {
+    EnumFacing getPointerFacing(NBTTagCompound tag) {
         return tag.hasKey("Facing", NBT.TAG_BYTE) ? EnumFacing.VALUES[tag.getByte("Facing")] : EnumFacing.NORTH;
     }
 
-    private Triple<Float, Float, Float> getHitPos(NBTTagCompound tag) {
+    Triple<Float, Float, Float> getHitPos(NBTTagCompound tag) {
         MutableTriple<Float, Float, Float> hitPos = MutableTriple.of(0.5F, 0.5F, 0.5F);
         if (tag.hasKey("HitX", NBT.TAG_FLOAT)) {
             hitPos.left = tag.getFloat("HitX");
@@ -164,7 +164,7 @@ public class ItemPointer extends Item {
     }
 
     // TODO: craft item with pointer for the pointer to mimic right-clicking with specific items
-    private void runRemoteRightClickRoutine(EntityPlayer player, World world, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public void runRemoteRightClickRoutine(EntityPlayer player, World world, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
         RightClickBlock event = ForgeHooks.onRightClickBlock(player, hand, pos, facing,
                 ForgeHooks.rayTraceEyeHitVec(player, player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 1)); // Compatibility purposes
         if (event.isCanceled()) {
