@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import javax.annotation.Nullable;
@@ -32,6 +33,10 @@ public class BlockBakedModel implements IBakedModel {
     private final Matrix4f tempModelMatrix = new Matrix4f();
     private final Vector3f PIVOT = new Vector3f(.5F, .5F, .5F);
     private final Vector3f APIVOT = new Vector3f(-.5F, -.5F, -.5F);
+
+    ResourceLocation block = BlockPointer.INSTANCE.getRegistryName();
+    TextureAtlasSprite particle;
+
 
     public BlockBakedModel() {
         super();
@@ -70,7 +75,7 @@ public class BlockBakedModel implements IBakedModel {
         IExtendedBlockState extState = (IExtendedBlockState) state;
 
         EnumFacing[] f = extState.getValue(BlockPointer.FACING);
-        ModelResourceLocation mrl = new ModelResourceLocation(state.getBlock().getRegistryName(), "normal");
+        ModelResourceLocation mrl = new ModelResourceLocation(block, "normal");
         IBakedModel m = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getModel(mrl);
 
         List<BakedQuad> q = m.getQuads(extState, side, rand);
@@ -187,7 +192,10 @@ public class BlockBakedModel implements IBakedModel {
 
     @Override
     public TextureAtlasSprite getParticleTexture() {
-        return null;
+        if (particle == null) {
+            particle = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getModel(new ModelResourceLocation(block, "normal")).getParticleTexture();
+        }
+        return particle;
     }
 
     @Override
