@@ -13,6 +13,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Tuple4f;
@@ -67,8 +68,8 @@ public class BlockBakedModel implements IBakedModel {
     }
 
     @Override
-    public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-        if (side != null) {
+    public @Nonnull List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
+        if (side != null || state == null) {
             return Collections.emptyList();
         }
 
@@ -78,7 +79,7 @@ public class BlockBakedModel implements IBakedModel {
         ModelResourceLocation mrl = new ModelResourceLocation(block, "normal");
         IBakedModel m = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getModel(mrl);
 
-        List<BakedQuad> q = m.getQuads(extState, side, rand);
+        List<BakedQuad> q = m.getQuads(extState, null, rand);
 
         Matrix4f transformMatrix = new Matrix4f();
         this.tempModelMatrix.setIdentity();
@@ -86,93 +87,102 @@ public class BlockBakedModel implements IBakedModel {
         final Tuple4f vertexTransformingVec = new Vector4f();
         if (f == null) return Collections.emptyList();
 
+        //transform the matrix so the top and front facings of the model matches the block in-world
         EnumFacing topFacing = f[0];
         EnumFacing frontFacing = f[1];
+        transformMatrixByFacings(transformMatrix, topFacing, frontFacing);
+
+        //all the vertex data is filled, so its safe to reuse the array
+        int[] newQuad = new int[28];
 
         List<BakedQuad> result = new ArrayList<>();
         for (BakedQuad b : q) {
-            transformMatrix.setIdentity();
-            moveToPivot(transformMatrix, PIVOT);
-
-            if (topFacing == UP || topFacing == DOWN) {
-                if (frontFacing == NORTH) {
-                    rotateY(transformMatrix, (float) (Math.PI));
-                } else if (frontFacing == EAST) {
-                    rotateY(transformMatrix, (float) (Math.PI / 2));
-                } else if (frontFacing == WEST) {
-                    rotateY(transformMatrix, (float) (-Math.PI / 2));
-                } else if (frontFacing == SOUTH) {
-                    //rotateY(transformMatrix, (float) (Math.PI));
-                }
-                if (topFacing == DOWN) {
-                    rotateX(transformMatrix, (float) (Math.PI));
-                    rotateY(transformMatrix, (float) (Math.PI));
-                }
-            } else {
-                if (topFacing == WEST) {
-                    rotateZ(transformMatrix, (float) (Math.PI / 2));
-                    if (frontFacing == DOWN) {
-                        rotateY(transformMatrix, (float) (-Math.PI / 2));
-                    } else if (frontFacing == UP) {
-                        rotateY(transformMatrix, (float) (+Math.PI / 2));
-                    }
-                } else if (topFacing == EAST) {
-                    rotateZ(transformMatrix, (float) (-Math.PI / 2));
-                    if (frontFacing == DOWN) {
-                        rotateY(transformMatrix, (float) (Math.PI / 2));
-                    } else if (frontFacing == UP) {
-                        rotateY(transformMatrix, (float) (-Math.PI / 2));
-                    }
-                } else if (topFacing == NORTH) {
-                    rotateX(transformMatrix, (float) (-Math.PI / 2));
-                    if (frontFacing == DOWN) {
-                        rotateY(transformMatrix, (float) (Math.PI));
-                    }
-                } else {
-                    rotateX(transformMatrix, (float) (Math.PI / 2));
-                    if (frontFacing == UP) {
-                        rotateY(transformMatrix, (float) (Math.PI));
-                    }
-                }
-            }
-
-            moveToPivot(transformMatrix, APIVOT);
-
-            int[] newQuad = new int[28];
-            int[] quadData = b.getVertexData();
-            for (int k = 0; k < 4; ++k) {
-                // Getting the offset for the current vertex.
-                int vertexIndex = k * 7;
-                vertexTransformingVec.x = Float.intBitsToFloat(quadData[vertexIndex]);
-                vertexTransformingVec.y = Float.intBitsToFloat(quadData[vertexIndex + 1]);
-                vertexTransformingVec.z = Float.intBitsToFloat(quadData[vertexIndex + 2]);
-                vertexTransformingVec.w = 1;
-
-                // Transforming it by the model matrix.
-                transformMatrix.transform(vertexTransformingVec);
-
-                // Converting the new data to ints.
-                int x = Float.floatToRawIntBits(vertexTransformingVec.x);
-                int y = Float.floatToRawIntBits(vertexTransformingVec.y);
-                int z = Float.floatToRawIntBits(vertexTransformingVec.z);
-
-                // vertex position data
-                newQuad[vertexIndex] = x;
-                newQuad[vertexIndex + 1] = y;
-                newQuad[vertexIndex + 2] = z;
-
-                newQuad[vertexIndex + 3] = quadData[vertexIndex + 3];
-
-                newQuad[vertexIndex + 4] = quadData[vertexIndex + 4]; //texture
-                newQuad[vertexIndex + 5] = quadData[vertexIndex + 5];
-
-                // vertex brightness
-                newQuad[vertexIndex + 6] = quadData[vertexIndex + 6];
-            }
-            b = new BakedQuad(newQuad, b.getTintIndex(), b.getFace(), b.getSprite(), true, DefaultVertexFormats.BLOCK);
+            b = rebakeQuad(b, newQuad, transformMatrix, vertexTransformingVec);
             result.add(b);
         }
         return result;
+    }
+
+    private void transformMatrixByFacings(Matrix4f transformMatrix, EnumFacing topFacing, EnumFacing frontFacing) {
+        transformMatrix.setIdentity();
+        moveToPivot(transformMatrix, PIVOT);
+
+        if (topFacing == UP || topFacing == DOWN) {
+            if (frontFacing == NORTH) {
+                rotateY(transformMatrix, (float) (Math.PI));
+            } else if (frontFacing == EAST) {
+                rotateY(transformMatrix, (float) (Math.PI / 2));
+            } else if (frontFacing == WEST) {
+                rotateY(transformMatrix, (float) (-Math.PI / 2));
+            } else if (frontFacing == SOUTH) {
+                //rotateY(transformMatrix, (float) (Math.PI));
+            }
+            if (topFacing == DOWN) {
+                rotateX(transformMatrix, (float) (Math.PI));
+                rotateY(transformMatrix, (float) (Math.PI));
+            }
+        } else {
+            if (topFacing == WEST) {
+                rotateZ(transformMatrix, (float) (Math.PI / 2));
+                if (frontFacing == DOWN) {
+                    rotateY(transformMatrix, (float) (-Math.PI / 2));
+                } else if (frontFacing == UP) {
+                    rotateY(transformMatrix, (float) (+Math.PI / 2));
+                }
+            } else if (topFacing == EAST) {
+                rotateZ(transformMatrix, (float) (-Math.PI / 2));
+                if (frontFacing == DOWN) {
+                    rotateY(transformMatrix, (float) (Math.PI / 2));
+                } else if (frontFacing == UP) {
+                    rotateY(transformMatrix, (float) (-Math.PI / 2));
+                }
+            } else if (topFacing == NORTH) {
+                rotateX(transformMatrix, (float) (-Math.PI / 2));
+                if (frontFacing == DOWN) {
+                    rotateY(transformMatrix, (float) (Math.PI));
+                }
+            } else {
+                rotateX(transformMatrix, (float) (Math.PI / 2));
+                if (frontFacing == UP) {
+                    rotateY(transformMatrix, (float) (Math.PI));
+                }
+            }
+        }
+        moveToPivot(transformMatrix, APIVOT);
+    }
+
+    BakedQuad rebakeQuad(BakedQuad b, int[] newQuad, Matrix4f transformMatrix, Tuple4f vertexTransformingVec) {
+        int[] quadData = b.getVertexData();
+        for (int k = 0; k < 4; ++k) {
+            // Getting the offset for the current vertex.
+            int vertexIndex = k * 7;
+            vertexTransformingVec.x = Float.intBitsToFloat(quadData[vertexIndex]);
+            vertexTransformingVec.y = Float.intBitsToFloat(quadData[vertexIndex + 1]);
+            vertexTransformingVec.z = Float.intBitsToFloat(quadData[vertexIndex + 2]);
+            vertexTransformingVec.w = 1;
+
+            // Transforming it by the model matrix.
+            transformMatrix.transform(vertexTransformingVec);
+
+            // Converting the new data to ints.
+            int x = Float.floatToRawIntBits(vertexTransformingVec.x);
+            int y = Float.floatToRawIntBits(vertexTransformingVec.y);
+            int z = Float.floatToRawIntBits(vertexTransformingVec.z);
+
+            // vertex position data
+            newQuad[vertexIndex] = x;
+            newQuad[vertexIndex + 1] = y;
+            newQuad[vertexIndex + 2] = z;
+
+            newQuad[vertexIndex + 3] = quadData[vertexIndex + 3];
+
+            newQuad[vertexIndex + 4] = quadData[vertexIndex + 4]; //texture
+            newQuad[vertexIndex + 5] = quadData[vertexIndex + 5];
+
+            // vertex brightness
+            newQuad[vertexIndex + 6] = quadData[vertexIndex + 6];
+        }
+        return new BakedQuad(newQuad, b.getTintIndex(), b.getFace(), b.getSprite(), true, DefaultVertexFormats.BLOCK);
     }
 
     @Override
@@ -191,7 +201,7 @@ public class BlockBakedModel implements IBakedModel {
     }
 
     @Override
-    public TextureAtlasSprite getParticleTexture() {
+    public @Nonnull TextureAtlasSprite getParticleTexture() {
         if (particle == null) {
             particle = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getModel(new ModelResourceLocation(block, "normal")).getParticleTexture();
         }
@@ -199,7 +209,7 @@ public class BlockBakedModel implements IBakedModel {
     }
 
     @Override
-    public ItemOverrideList getOverrides() {
-        return null;
+    public @Nonnull ItemOverrideList getOverrides() {
+        return ItemOverrideList.NONE;
     }
 }
