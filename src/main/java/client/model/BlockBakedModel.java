@@ -69,7 +69,7 @@ public class BlockBakedModel implements IBakedModel {
 
     @Override
     public @Nonnull List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-        if (side != null || state == null) {
+        if (side != null) {
             return Collections.emptyList();
         }
 
@@ -92,13 +92,10 @@ public class BlockBakedModel implements IBakedModel {
         EnumFacing frontFacing = f[1];
         transformMatrixByFacings(transformMatrix, topFacing, frontFacing);
 
-        //all the vertex data is filled, so its safe to reuse the array
-        int[] newQuad = new int[28];
-
         List<BakedQuad> result = new ArrayList<>();
         for (BakedQuad b : q) {
-            b = rebakeQuad(b, newQuad, transformMatrix, vertexTransformingVec);
-            result.add(b);
+            int[] newQuad = new int[28];
+            result.add(rebakeQuad(b, newQuad, transformMatrix, vertexTransformingVec));
         }
         return result;
     }

@@ -1,30 +1,31 @@
 package tile;
 
+import api.IPointingDevice;
+import com.cleanroommc.pointer.EntityPlayerExpansion;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.Triple;
 
-public class TilePointer extends TileEntity {
-    private final ItemStackHandler handler;
+public class TilePointer extends TileEntity implements IPointingDevice {
     private EnumFacing[] facings;
+    private boolean reset;
 
     public TilePointer() {
         super();
-        handler = new ItemStackHandler(1);
         facings = new EnumFacing[2];
-    }
-
-    public ItemStack getPointer() {
-        return handler.getStackInSlot(0);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setTag("pointer", handler.serializeNBT());
         compound.setInteger("topFacing", facings[0].ordinal());
         compound.setInteger("frontFacing", facings[1].ordinal());
         return super.writeToNBT(compound);
@@ -32,7 +33,6 @@ public class TilePointer extends TileEntity {
 
     @Override
     public void readFromNBT(NBTTagCompound compound) {
-        handler.deserializeNBT(compound.getCompoundTag("pointer"));
         facings[0] = EnumFacing.byIndex(compound.getInteger("topFacing"));
         facings[1] = EnumFacing.byIndex(compound.getInteger("frontFacing"));
         super.readFromNBT(compound);
@@ -64,8 +64,22 @@ public class TilePointer extends TileEntity {
         this.readFromNBT(packet.getNbtCompound());
     }
 
-    public void setPointer(ItemStack c) {
-        handler.setStackInSlot(0, c.copy());
+    @Override
+    public void runUseLogic(NBTTagCompound tag, World world, EntityPlayer player, EnumHand hand, BlockPos pos) {
+        Triple<Float, Float, Float> hitPos = getHitPos(tag);
+        ((EntityPlayerExpansion) player).setUsingPointer();
+        if (!world.isRemote) {
+            runRemoteRightClickRoutine(player, world, hand, pos, getPointerFacing(tag), hitPos.getLeft(), hitPos.getMiddle(), hitPos.getRight());
+        }
+    }
+
+    public void setFromPointer(ItemStack pointerStack) {
+        if (pointerStack.getTagCompound() != null) {
+            if (pointerStack.getTagCompound().hasKey("Pointer")) {
+                NBTTagCompound tileNBT = this.getTileData();
+                tileNBT.setTag("Pointer", pointerStack.getTagCompound().getCompoundTag("Pointer").copy());
+            }
+        }
         markDirty();
     }
 
@@ -77,5 +91,16 @@ public class TilePointer extends TileEntity {
 
     public EnumFacing[] getFacings() {
         return facings;
+    }
+
+    public boolean attemptReset() {
+        if (reset) {
+            this.getTileData().removeTag("Pointer");
+            reset = false;
+            return true;
+        } else {
+            this.reset = true;
+            return false;
+        }
     }
 }

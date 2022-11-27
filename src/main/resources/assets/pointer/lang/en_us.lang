@@ -3,6 +3,8 @@ item.pointer.name=Pointer
 pointer.message.acquire=Pointer Data Acquired from %s
 pointer.message.removal=Pointer Data Removed
 
+pointer.message.reset=Shift + Right click again to reset link
+
 pointer.tooltip.dimension=Dimension: %s
 pointer.tooltip.position=Position: %s
 pointer.tooltip.facing=Facing: %s

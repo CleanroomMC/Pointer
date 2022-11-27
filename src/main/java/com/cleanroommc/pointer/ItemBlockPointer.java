@@ -26,9 +26,7 @@ public class ItemBlockPointer extends ItemBlock {
 
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
-
         if (!world.setBlockState(pos, newState, 11)) return false;
-
         EnumFacing[] facings = new EnumFacing[2];
         if (side == EnumFacing.UP || side == EnumFacing.DOWN) {
             facings[0] = side;
@@ -47,11 +45,9 @@ public class ItemBlockPointer extends ItemBlock {
             if (tp != null) {
                 tp.setFacings(facings);
             }
-
             if (player instanceof EntityPlayerMP)
                 CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP) player, pos, stack);
         }
-
         return true;
     }
 }
