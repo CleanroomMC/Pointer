@@ -1,4 +1,4 @@
-package api;
+package com.cleanroommc.pointer.api;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

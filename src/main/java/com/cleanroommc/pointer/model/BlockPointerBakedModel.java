@@ -1,4 +1,4 @@
-package client.model;
+package com.cleanroommc.pointer.model;
 
 import com.cleanroommc.pointer.BlockPointer;
 import net.minecraft.block.state.IBlockState;
@@ -30,7 +30,7 @@ import static net.minecraft.util.EnumFacing.SOUTH;
 import static net.minecraft.util.EnumFacing.UP;
 import static net.minecraft.util.EnumFacing.WEST;
 
-public class BlockBakedModel implements IBakedModel {
+public class BlockPointerBakedModel implements IBakedModel {
     private final Matrix4f tempModelMatrix = new Matrix4f();
     private final Vector3f PIVOT = new Vector3f(.5F, .5F, .5F);
     private final Vector3f APIVOT = new Vector3f(-.5F, -.5F, -.5F);
@@ -39,7 +39,7 @@ public class BlockBakedModel implements IBakedModel {
     TextureAtlasSprite particle;
 
 
-    public BlockBakedModel() {
+    public BlockPointerBakedModel() {
         super();
     }
 
@@ -111,8 +111,6 @@ public class BlockBakedModel implements IBakedModel {
                 rotateY(transformMatrix, (float) (Math.PI / 2));
             } else if (frontFacing == WEST) {
                 rotateY(transformMatrix, (float) (-Math.PI / 2));
-            } else if (frontFacing == SOUTH) {
-                //rotateY(transformMatrix, (float) (Math.PI));
             }
             if (topFacing == DOWN) {
                 rotateX(transformMatrix, (float) (Math.PI));
@@ -125,6 +123,10 @@ public class BlockBakedModel implements IBakedModel {
                     rotateY(transformMatrix, (float) (-Math.PI / 2));
                 } else if (frontFacing == UP) {
                     rotateY(transformMatrix, (float) (+Math.PI / 2));
+                } else if (frontFacing == EAST) {
+                    //
+                } else if (frontFacing == SOUTH) {
+                    rotateY(transformMatrix, (float) (Math.PI));
                 }
             } else if (topFacing == EAST) {
                 rotateZ(transformMatrix, (float) (-Math.PI / 2));
@@ -132,16 +134,28 @@ public class BlockBakedModel implements IBakedModel {
                     rotateY(transformMatrix, (float) (Math.PI / 2));
                 } else if (frontFacing == UP) {
                     rotateY(transformMatrix, (float) (-Math.PI / 2));
+                }else if (frontFacing == NORTH) {
+                    rotateY(transformMatrix, (float) (-Math.PI));
                 }
             } else if (topFacing == NORTH) {
                 rotateX(transformMatrix, (float) (-Math.PI / 2));
                 if (frontFacing == DOWN) {
                     rotateY(transformMatrix, (float) (Math.PI));
+                } else if (frontFacing == EAST) {
+                    rotateY(transformMatrix, (float) (-Math.PI / 2));
+                } else if (frontFacing == WEST) {
+                    rotateY(transformMatrix, (float) (Math.PI / 2));
                 }
             } else {
                 rotateX(transformMatrix, (float) (Math.PI / 2));
                 if (frontFacing == UP) {
                     rotateY(transformMatrix, (float) (Math.PI));
+                } else if (frontFacing == EAST) {
+                    rotateY(transformMatrix, (float) (Math.PI / 2));
+                } else if (frontFacing == SOUTH) {
+                    rotateY(transformMatrix, (float) (Math.PI / 2));
+                }else if (frontFacing == WEST) {
+                    rotateY(transformMatrix, (float) (-Math.PI / 2));
                 }
             }
         }

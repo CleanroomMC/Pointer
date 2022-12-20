@@ -1,6 +1,6 @@
 package com.cleanroommc.pointer;
 
-import api.IPointingDevice;
+import com.cleanroommc.pointer.api.IPointingDevice;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;

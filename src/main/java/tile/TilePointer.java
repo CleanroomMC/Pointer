@@ -1,9 +1,8 @@
 package tile;
 
-import api.IPointingDevice;
+import com.cleanroommc.pointer.api.IPointingDevice;
 import com.cleanroommc.pointer.EntityPlayerExpansion;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -41,17 +40,17 @@ public class TilePointer extends TileEntity implements IPointingDevice {
     @Override
     public NBTTagCompound getUpdateTag() {
         // getUpdateTag() is called whenever the chunkdata is sent to the
-        // client. In contrast getUpdatePacket() is called when the tile entity
-        // itself wants to sync to the client. In many cases you want to send
+        // com.cleanroommc.pointer.client. In contrast getUpdatePacket() is called when the tile entity
+        // itself wants to sync to the com.cleanroommc.pointer.client. In many cases you want to send
         // over the same information in getUpdateTag() as in getUpdatePacket().
         return writeToNBT(new NBTTagCompound());
     }
 
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
-        // Prepare a packet for syncing our TE to the client. Since we only have to sync the stack
+        // Prepare a packet for syncing our TE to the com.cleanroommc.pointer.client. Since we only have to sync the stack
         // and that's all we have we just write our entire NBT here. If you have a complex
-        // tile entity that doesn't need to have all information on the client you can write
+        // tile entity that doesn't need to have all information on the com.cleanroommc.pointer.client you can write
         // a more optimal NBT here.
         NBTTagCompound nbtTag = new NBTTagCompound();
         this.writeToNBT(nbtTag);
@@ -60,7 +59,7 @@ public class TilePointer extends TileEntity implements IPointingDevice {
 
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet) {
-        // Here we get the packet from the server and read it into our client side tile entity
+        // Here we get the packet from the server and read it into our com.cleanroommc.pointer.client side tile entity
         this.readFromNBT(packet.getNbtCompound());
     }
 
@@ -86,6 +85,16 @@ public class TilePointer extends TileEntity implements IPointingDevice {
     public void setFacings(EnumFacing[] facings) {
         this.facings = new EnumFacing[facings.length];
         System.arraycopy(facings, 0, this.facings, 0, facings.length);
+        markDirty();
+    }
+
+    public void setFront(EnumFacing newFront){
+        this.facings[1] = newFront;
+        markDirty();
+    }
+
+    public void setTop(EnumFacing newTop){
+        this.facings[0] = newTop;
         markDirty();
     }
 

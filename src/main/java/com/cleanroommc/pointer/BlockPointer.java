@@ -1,6 +1,5 @@
 package com.cleanroommc.pointer;
 
-import api.IPointingDevice;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -11,7 +10,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -117,6 +115,26 @@ public class BlockPointer extends Block implements ITileEntityProvider {
     }
 
     @Override
+    public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
+        TileEntity te = world.getTileEntity(pos);
+        if (te != null) {
+            TilePointer tilePointer = (TilePointer) te;
+
+            EnumFacing topFacing = tilePointer.getFacings()[0];
+            EnumFacing frontFacing = tilePointer.getFacings()[1];
+            if (topFacing == axis) {
+                tilePointer.setFront(frontFacing.rotateAround(topFacing.getAxis()));
+            } else {
+                tilePointer.setFront(frontFacing.rotateAround(axis.getAxis()));
+                tilePointer.setTop(topFacing.rotateAround(axis.getAxis()));
+            }
+            world.markBlockRangeForRenderUpdate(pos, pos);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean isFullBlock(IBlockState state) {
         return false;
     }
@@ -135,6 +153,4 @@ public class BlockPointer extends Block implements ITileEntityProvider {
     public EnumBlockRenderType getRenderType(IBlockState state) {
         return EnumBlockRenderType.MODEL;
     }
-
-
 }
