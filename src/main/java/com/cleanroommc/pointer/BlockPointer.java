@@ -100,6 +100,7 @@ public class BlockPointer extends Block implements ITileEntityProvider {
                 lastUsed.putIfAbsent(player, System.currentTimeMillis());
                 if (System.currentTimeMillis() - lastUsed.get(player) > 2000) {
                     lastUsed.put(player, System.currentTimeMillis());
+                    player.sendStatusMessage(new TextComponentTranslation("pointer.message.cooldown"), false);
                 } else {
                     return true;
                 }

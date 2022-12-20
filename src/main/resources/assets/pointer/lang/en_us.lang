@@ -2,6 +2,7 @@ item.pointer.name=Pointer
 tile.remote_control_station.name=Remote control station
 
 pointer.message.acquire=Pointer Data Acquired from %s
+pointer.message.cooldown=Pointer in cooldown
 pointer.message.removal=Pointer Data Removed
 
 pointer.message.reset=Shift + Right click again to reset link
