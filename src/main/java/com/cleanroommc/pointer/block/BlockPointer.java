@@ -1,7 +1,6 @@
 package com.cleanroommc.pointer.block;
 
 import com.cleanroommc.pointer.item.ItemPointer;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.ITileEntityProvider;
@@ -28,7 +27,6 @@ import com.cleanroommc.pointer.block.tile.TilePointer;
 import net.minecraftforge.common.property.Properties.PropertyAdapter;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
 public class BlockPointer extends Block implements ITileEntityProvider {
 
@@ -38,7 +36,6 @@ public class BlockPointer extends Block implements ITileEntityProvider {
     public static final IUnlistedProperty<EnumFacing> FRONT_FACING = new PropertyAdapter<>(BlockDirectional.FACING);
 
     public static BlockPointer INSTANCE;
-    public static Map<EntityPlayer, Long> lastUsed = new Object2ObjectOpenHashMap<>();
 
     public BlockPointer(Material materialIn) {
         super(materialIn);
@@ -109,13 +106,13 @@ public class BlockPointer extends Block implements ITileEntityProvider {
             }
 
             if (!world.isRemote) {
-                lastUsed.putIfAbsent(player, System.currentTimeMillis());
-                if (System.currentTimeMillis() - lastUsed.get(player) > 2000) {
-                    lastUsed.put(player, System.currentTimeMillis());
+                long current = System.currentTimeMillis();
+                if ((current - tp.getLastUsed()) > 2000) {
                     player.sendStatusMessage(new TextComponentTranslation("pointer.message.cooldown"), false);
                 } else {
-                    return true;
+                    tp.setLastUsed(current);
                 }
+                return true;
             }
 
             if (tp.hasTarget(tp.getTileData())) {
