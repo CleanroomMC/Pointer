@@ -1,7 +1,11 @@
 item.pointer.name=Pointer
+tile.remote_control_station.name=Remote Control Station
 
 pointer.message.acquire=Pointer Data Acquired from %s
+pointer.message.cooldown=Pointer in Cooldown
 pointer.message.removal=Pointer Data Removed
+
+pointer.message.reset=Shift + right click again to reset link
 
 pointer.tooltip.dimension=Dimension: %s
 pointer.tooltip.position=Position: %s
