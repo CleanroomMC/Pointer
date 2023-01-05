@@ -1,5 +1,6 @@
-package com.cleanroommc.pointer;
+package com.cleanroommc.pointer.item;
 
+import com.cleanroommc.pointer.EntityPlayerExpansion;
 import com.cleanroommc.pointer.api.IPointingDevice;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -14,7 +15,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants.NBT;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -74,20 +74,20 @@ public class ItemPointer extends Item implements IPointingDevice {
     @Override
     public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flagIn) {
         if (stack.getTagCompound() != null) {
-            if (stack.getTagCompound().hasKey("Pointer", NBT.TAG_COMPOUND)) {
-                NBTTagCompound tag = stack.getTagCompound().getCompoundTag("Pointer");
-                Integer dimension = getPointerDimension(tag);
+            NBTTagCompound pointerTag = stack.getTagCompound().getCompoundTag("Pointer");
+            if (!pointerTag.isEmpty()) {
+                Integer dimension = getPointerDimension(pointerTag);
                 if (dimension == null) {
                     return;
                 }
-                BlockPos pos = getPointerPos(tag);
+                BlockPos pos = getPointerPos(pointerTag);
                 if (pos == null) {
                     return;
                 }
-                Triple<Float, Float, Float> hitPos = getHitPos(tag);
-                tooltip.add(I18n.format("pointer.tooltip.dimension", dimension + " (" + getPointerDimensionName(tag) + ')'));
+                Triple<Float, Float, Float> hitPos = getHitPos(pointerTag);
+                tooltip.add(I18n.format("pointer.tooltip.dimension", dimension + " (" + getPointerDimensionName(pointerTag) + ')'));
                 tooltip.add(I18n.format("pointer.tooltip.position", ("x: " + pos.getX() + ", y: " + pos.getY() + ", z: " + pos.getZ())));
-                tooltip.add(I18n.format("pointer.tooltip.facing", StringUtils.capitalize(getPointerFacing(tag).toString())));
+                tooltip.add(I18n.format("pointer.tooltip.facing", StringUtils.capitalize(getPointerFacing(pointerTag).toString())));
                 tooltip.add(I18n.format("pointer.tooltip.hit_vector", ("x: " + hitPos.getLeft() + ", y: " + hitPos.getMiddle() + ", z: " + hitPos.getRight())));
             }
         }

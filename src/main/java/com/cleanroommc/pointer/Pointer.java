@@ -1,7 +1,10 @@
 package com.cleanroommc.pointer;
 
-import com.cleanroommc.pointer.model.BlockPointerBakedModel;
-import com.cleanroommc.pointer.model.SimpleStateMapper;
+import com.cleanroommc.pointer.block.BlockPointer;
+import com.cleanroommc.pointer.client.model.BlockPointerBakedModel;
+import com.cleanroommc.pointer.item.ItemBlockPointer;
+import com.cleanroommc.pointer.item.ItemPointer;
+import com.cleanroommc.pointer.client.model.SimpleStateMapper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -20,9 +23,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
-import tile.TilePointer;
+import com.cleanroommc.pointer.block.tile.TilePointer;
 
-@Mod(modid = "pointer", name = "Pointer", version = "1.0")
+@Mod(modid = "pointer", name = "Pointer", version = "1.0", dependencies = "required:mixinbooter")
 public class Pointer {
 
     @EventHandler
@@ -65,7 +68,6 @@ public class Pointer {
         @SubscribeEvent
         public void onModelsBake(ModelBakeEvent event) {
             event.getModelRegistry().putObject(BlockPointer.MODEL_LOCATION, new BlockPointerBakedModel());
-
         }
     }
 

@@ -1,10 +1,12 @@
-package com.cleanroommc.pointer;
+package com.cleanroommc.pointer.block;
 
+import com.cleanroommc.pointer.item.ItemPointer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -12,27 +14,31 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
-import tile.TilePointer;
+import com.cleanroommc.pointer.block.tile.TilePointer;
+import net.minecraftforge.common.property.Properties.PropertyAdapter;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
 public class BlockPointer extends Block implements ITileEntityProvider {
+
+    public static final AxisAlignedBB SHAPE = Block.FULL_BLOCK_AABB.setMaxY(7 / 16D);
+    public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation(new ResourceLocation("pointer", "render"), "normal");
+    public static final IUnlistedProperty<EnumFacing> TOP_FACING = new PropertyAdapter<>(BlockDirectional.FACING);
+    public static final IUnlistedProperty<EnumFacing> FRONT_FACING = new PropertyAdapter<>(BlockDirectional.FACING);
+
     public static BlockPointer INSTANCE;
     public static Map<EntityPlayer, Long> lastUsed = new Object2ObjectOpenHashMap<>();
-    public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation(new ResourceLocation("pointer", "render"), "normal");
-    public static final IUnlistedProperty<EnumFacing[]> FACING = UnlistedDirection.INSTANCE;
 
     public BlockPointer(Material materialIn) {
         super(materialIn);
@@ -43,7 +49,7 @@ public class BlockPointer extends Block implements ITileEntityProvider {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new ExtendedBlockState(this, new IProperty[]{}, new IUnlistedProperty[]{FACING});
+        return new BlockStateContainer.Builder(this).add(TOP_FACING, FRONT_FACING).build();
     }
 
     @Override
@@ -51,14 +57,20 @@ public class BlockPointer extends Block implements ITileEntityProvider {
         TileEntity te = world.getTileEntity(pos);
         IExtendedBlockState extState = (IExtendedBlockState) state;
         if (te instanceof TilePointer) {
-            return extState.withProperty(FACING, ((TilePointer) te).getFacings());
+            TilePointer pointer = (TilePointer) te;
+            return extState.withProperty(TOP_FACING, pointer.getTopFacing()).withProperty(FRONT_FACING, pointer.getFrontFacing());
         }
         return super.getExtendedState(state, world, pos);
     }
 
     @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        return super.getActualState(state, worldIn, pos);
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+        return SHAPE;
+    }
+
+    @Override
+    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
+        return BlockFaceShape.UNDEFINED;
     }
 
     @Nullable
@@ -120,14 +132,12 @@ public class BlockPointer extends Block implements ITileEntityProvider {
         TileEntity te = world.getTileEntity(pos);
         if (te != null) {
             TilePointer tilePointer = (TilePointer) te;
-
-            EnumFacing topFacing = tilePointer.getFacings()[0];
-            EnumFacing frontFacing = tilePointer.getFacings()[1];
+            EnumFacing topFacing = tilePointer.getTopFacing();
+            EnumFacing frontFacing = tilePointer.getFrontFacing();
             if (topFacing == axis) {
-                tilePointer.setFront(frontFacing.rotateAround(topFacing.getAxis()));
+                tilePointer.setFrontFacing(frontFacing.rotateAround(topFacing.getAxis()));
             } else {
-                tilePointer.setFront(frontFacing.rotateAround(axis.getAxis()));
-                tilePointer.setTop(topFacing.rotateAround(axis.getAxis()));
+                tilePointer.setFacings(topFacing.rotateAround(axis.getAxis()), frontFacing.rotateAround(axis.getAxis()));
             }
             world.markBlockRangeForRenderUpdate(pos, pos);
             return true;
@@ -150,8 +160,4 @@ public class BlockPointer extends Block implements ITileEntityProvider {
         return false;
     }
 
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.MODEL;
-    }
 }

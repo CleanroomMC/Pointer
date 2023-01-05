@@ -1,7 +1,7 @@
-package tile;
+package com.cleanroommc.pointer.block.tile;
 
-import com.cleanroommc.pointer.api.IPointingDevice;
 import com.cleanroommc.pointer.EntityPlayerExpansion;
+import com.cleanroommc.pointer.api.IPointingDevice;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -15,43 +15,39 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Triple;
 
 public class TilePointer extends TileEntity implements IPointingDevice {
-    private EnumFacing[] facings;
+
+    private EnumFacing top, front;
     private boolean reset;
 
-    public TilePointer() {
-        super();
-        facings = new EnumFacing[2];
+    public EnumFacing getTopFacing() {
+        return top;
+    }
+
+    public EnumFacing getFrontFacing() {
+        return front;
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setInteger("topFacing", facings[0].ordinal());
-        compound.setInteger("frontFacing", facings[1].ordinal());
+        compound.setByte("TopFacing", (byte) this.top.ordinal());
+        compound.setByte("FrontFacing", (byte) this.front.ordinal());
         return super.writeToNBT(compound);
     }
 
     @Override
     public void readFromNBT(NBTTagCompound compound) {
-        facings[0] = EnumFacing.byIndex(compound.getInteger("topFacing"));
-        facings[1] = EnumFacing.byIndex(compound.getInteger("frontFacing"));
+        this.top = EnumFacing.VALUES[(compound.getByte("TopFacing"))];
+        this.front = EnumFacing.VALUES[(compound.getByte("FrontFacing"))];
         super.readFromNBT(compound);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        // getUpdateTag() is called whenever the chunkdata is sent to the
-        // com.cleanroommc.pointer.client. In contrast getUpdatePacket() is called when the tile entity
-        // itself wants to sync to the com.cleanroommc.pointer.client. In many cases you want to send
-        // over the same information in getUpdateTag() as in getUpdatePacket().
         return writeToNBT(new NBTTagCompound());
     }
 
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
-        // Prepare a packet for syncing our TE to the com.cleanroommc.pointer.client. Since we only have to sync the stack
-        // and that's all we have we just write our entire NBT here. If you have a complex
-        // tile entity that doesn't need to have all information on the com.cleanroommc.pointer.client you can write
-        // a more optimal NBT here.
         NBTTagCompound nbtTag = new NBTTagCompound();
         this.writeToNBT(nbtTag);
         return new SPacketUpdateTileEntity(getPos(), 1, nbtTag);
@@ -59,15 +55,14 @@ public class TilePointer extends TileEntity implements IPointingDevice {
 
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet) {
-        // Here we get the packet from the server and read it into our com.cleanroommc.pointer.client side tile entity
         this.readFromNBT(packet.getNbtCompound());
     }
 
     @Override
     public void runUseLogic(NBTTagCompound tag, World world, EntityPlayer player, EnumHand hand, BlockPos pos) {
         Triple<Float, Float, Float> hitPos = getHitPos(tag);
-        ((EntityPlayerExpansion) player).setUsingPointer();
         if (!world.isRemote) {
+            ((EntityPlayerExpansion) player).setUsingPointer();
             runRemoteRightClickRoutine(player, world, hand, pos, getPointerFacing(tag), hitPos.getLeft(), hitPos.getMiddle(), hitPos.getRight());
         }
     }
@@ -82,34 +77,31 @@ public class TilePointer extends TileEntity implements IPointingDevice {
         markDirty();
     }
 
-    public void setFacings(EnumFacing[] facings) {
-        this.facings = new EnumFacing[facings.length];
-        System.arraycopy(facings, 0, this.facings, 0, facings.length);
+    public void setFacings(EnumFacing top, EnumFacing front) {
+        this.top = top;
+        this.front = front;
         markDirty();
     }
 
-    public void setFront(EnumFacing newFront){
-        this.facings[1] = newFront;
+    public void setTopFacing(EnumFacing top) {
+        this.top = top;
         markDirty();
     }
 
-    public void setTop(EnumFacing newTop){
-        this.facings[0] = newTop;
+    public void setFrontFacing(EnumFacing front) {
+        this.front = front;
         markDirty();
-    }
-
-    public EnumFacing[] getFacings() {
-        return facings;
     }
 
     public boolean attemptReset() {
-        if (reset) {
+        if (this.reset) {
             this.getTileData().removeTag("Pointer");
-            reset = false;
+            this.reset = false;
             return true;
         } else {
             this.reset = true;
             return false;
         }
     }
+
 }
