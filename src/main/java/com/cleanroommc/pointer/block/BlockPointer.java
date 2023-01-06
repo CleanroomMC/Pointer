@@ -42,6 +42,7 @@ public class BlockPointer extends Block implements ITileEntityProvider {
         setRegistryName("pointer", "remote_control_station");
         setTranslationKey("remote_control_station");
         setCreativeTab(CreativeTabs.TOOLS);
+        setLightLevel(0.875F);
     }
 
     @Override
