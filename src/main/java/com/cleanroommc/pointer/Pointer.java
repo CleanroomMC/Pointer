@@ -28,7 +28,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import com.cleanroommc.pointer.block.tile.TilePointer;
 
-@Mod(modid = "pointer", name = "Pointer", version = "1.0", dependencies = "required:mixinbooter")
+@Mod(modid = "pointer", name = "Pointer", version = "2.0", dependencies = "required:mixinbooter")
 public class Pointer {
 
     @EventHandler

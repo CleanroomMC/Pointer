@@ -6,8 +6,7 @@
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "https://github.com/CleanroomMC/Pointer",
-  "authorList": ["CleanroomMC", "Rongmario"],
-  "credits": "Rongmario",
+  "authorList": ["CleanroomMC", "Rongmario", "PrototypeTrousers"],
   "logoFile": "icon.png",
   "screenshots": [],
   "dependencies": []
