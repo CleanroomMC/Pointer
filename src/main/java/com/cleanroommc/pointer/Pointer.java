@@ -14,7 +14,10 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Config.Type;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -55,6 +58,13 @@ public class Pointer {
         GameRegistry.registerTileEntity(TilePointer.class, new ResourceLocation("pointer", "tilepointer"));
     }
 
+    @SubscribeEvent
+    public void onConfigChangedListener(ConfigChangedEvent.OnConfigChangedEvent event) {
+        if ("pointer".equals(event.getModID())) {
+            ConfigManager.sync("pointer", Type.INSTANCE);
+        }
+    }
+
     public static class ClientEventHandler {
 
         @SubscribeEvent
@@ -69,6 +79,7 @@ public class Pointer {
         public void onModelsBake(ModelBakeEvent event) {
             event.getModelRegistry().putObject(BlockPointer.MODEL_LOCATION, new BlockPointerBakedModel());
         }
+
     }
 
 }

@@ -1,6 +1,7 @@
 package com.cleanroommc.pointer.item;
 
 import com.cleanroommc.pointer.EntityPlayerExpansion;
+import com.cleanroommc.pointer.PointerConfig;
 import com.cleanroommc.pointer.api.IPointingDevice;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -14,7 +15,10 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -30,6 +34,11 @@ public class ItemPointer extends Item implements IPointingDevice {
         setRegistryName("pointer", "pointer");
         setTranslationKey("pointer");
         setCreativeTab(CreativeTabs.TOOLS);
+    }
+
+    @Override
+    public int getMaxDamage(ItemStack stack) {
+        return PointerConfig.itemMaxDurability;
     }
 
     @Override
@@ -58,6 +67,24 @@ public class ItemPointer extends Item implements IPointingDevice {
         player.swingArm(hand);
         player.getCooldownTracker().setCooldown(this, 40);
         if (!world.isRemote) {
+            if (PointerConfig.itemMaxDurability > 0) {
+                int distance = (int) player.getDistance(pos.getX(), pos.getY(), pos.getZ());
+                int damage;
+                switch (PointerConfig.durabilityMode) {
+                    case SQRT:
+                        damage = (int) Math.sqrt(distance);
+                        break;
+                    case LOG_2:
+                        damage = MathHelper.log2(distance);
+                        break;
+                    case LOG_10:
+                        damage = (int) Math.log10(distance);
+                        break;
+                    default:
+                        damage = distance;
+                }
+                player.getHeldItem(hand).damageItem(Math.max(1, damage), player);
+            }
             runRemoteRightClickRoutine(player, world, hand, pos, getPointerFacing(tag), hitPos.getLeft(), hitPos.getMiddle(), hitPos.getRight());
         }
     }
@@ -72,6 +99,7 @@ public class ItemPointer extends Item implements IPointingDevice {
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flagIn) {
         if (stack.getTagCompound() != null) {
             NBTTagCompound pointerTag = stack.getTagCompound().getCompoundTag("Pointer");
