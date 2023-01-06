@@ -43,6 +43,8 @@ public class BlockPointer extends Block implements ITileEntityProvider {
         setTranslationKey("remote_control_station");
         setCreativeTab(CreativeTabs.TOOLS);
         setLightLevel(0.875F);
+        setHardness(4F);
+        setHarvestLevel("pickaxe", 1);
     }
 
     @Override
