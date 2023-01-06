@@ -17,7 +17,7 @@
     },
     "G": {
       "type": "forge:ore_dict",
-      "ore": "glass"
+      "ore": "blockGlass"
     },
     "P": {
       "type": "minecraft:item",
