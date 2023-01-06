@@ -70,7 +70,7 @@ public class BlockPointerBakedModel implements IBakedModel {
 
     @Override
     public boolean isAmbientOcclusion() {
-        return false;
+        return true;
     }
 
     @Override
@@ -237,7 +237,7 @@ public class BlockPointerBakedModel implements IBakedModel {
             // Vertex brightness
             newQuad[vertexIndex + 6] = quadData[vertexIndex + 6];
         }
-        return new BakedQuad(newQuad, b.getTintIndex(), b.getFace(), b.getSprite(), false, DefaultVertexFormats.BLOCK);
+        return new BakedQuad(newQuad, b.getTintIndex(), b.getFace(), b.getSprite(), true, DefaultVertexFormats.BLOCK);
     }
 
 }
