@@ -17,9 +17,8 @@ import org.apache.commons.lang3.tuple.Triple;
 public class TilePointer extends TileEntity implements IPointingDevice {
 
     private EnumFacing top, front;
-
     private boolean reset;
-    private long lastUsed = 0;
+    private boolean cooldown;
 
     public EnumFacing getTopFacing() {
         return top;
@@ -29,8 +28,8 @@ public class TilePointer extends TileEntity implements IPointingDevice {
         return front;
     }
 
-    public long getLastUsed() {
-        return lastUsed;
+    public boolean isCoolingDown() {
+        return cooldown;
     }
 
     @Override
@@ -99,8 +98,12 @@ public class TilePointer extends TileEntity implements IPointingDevice {
         markDirty();
     }
 
-    public void setLastUsed(long lastUsed) {
-        this.lastUsed = lastUsed;
+    public void setCooldown() {
+        this.cooldown = true;
+    }
+
+    public void finishCooldown() {
+        this.cooldown = false;
     }
 
     public boolean attemptReset() {

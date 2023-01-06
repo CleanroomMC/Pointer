@@ -1,0 +1,30 @@
+{
+  "type": "forge:ore_shaped",
+  "group": "pointer:pointer",
+  "pattern": [
+    "IGI",
+    "RPR",
+    "IGI"
+  ],
+  "key": {
+    "I": {
+      "type": "forge:ore_dict",
+      "ore": "ingotIron"
+    },
+    "R": {
+      "type": "forge:ore_dict",
+      "ore": "blockRedstone"
+    },
+    "G": {
+      "type": "forge:ore_dict",
+      "ore": "glass"
+    },
+    "P": {
+      "type": "minecraft:item",
+      "item": "pointer:pointer"
+    }
+  },
+  "result": {
+    "item": "pointer:remote_control_station"
+  }
+}

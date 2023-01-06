@@ -27,6 +27,7 @@ import com.cleanroommc.pointer.block.tile.TilePointer;
 import net.minecraftforge.common.property.Properties.PropertyAdapter;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 public class BlockPointer extends Block implements ITileEntityProvider {
 
@@ -80,6 +81,14 @@ public class BlockPointer extends Block implements ITileEntityProvider {
     }
 
     @Override
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+        TileEntity te = worldIn.getTileEntity(pos);
+        if (te instanceof TilePointer) {
+            ((TilePointer) te).finishCooldown();
+        }
+    }
+
+    @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         TileEntity te = world.getTileEntity(pos);
         if (te instanceof TilePointer) {
@@ -109,19 +118,16 @@ public class BlockPointer extends Block implements ITileEntityProvider {
             }
 
             if (!world.isRemote) {
-                long current = System.currentTimeMillis();
-                if ((current - tp.getLastUsed()) > 2000) {
-                    player.sendStatusMessage(new TextComponentTranslation("pointer.message.cooldown"), false);
-                } else {
-                    tp.setLastUsed(current);
+                boolean hasTarget = tp.hasTarget(tp.getTileData());
+                if (hasTarget) {
+                    if (tp.isCoolingDown()) {
+                        player.sendStatusMessage(new TextComponentTranslation("pointer.message.cooldown"), true);
+                    } else if (tp.attemptRemoteUse(tp.getTileData().getCompoundTag("Pointer"), world, player, hand)) {
+                        tp.setCooldown();
+                        world.scheduleUpdate(pos, this, 40);
+                    }
                 }
                 return true;
-            }
-
-            if (tp.hasTarget(tp.getTileData())) {
-                if (tp.attemptRemoteUse(tp.getTileData().getCompoundTag("Pointer"), world, player, hand)) {
-                    return true;
-                }
             }
         }
         return true;
